@@ -1,24 +1,34 @@
-from contex_manager import UserBook
+from __init__ import USERS_JSON_PATH, BOOKS_CSV_PATH
+import json
+from csv import DictReader
 
-obj = UserBook()
+with open(USERS_JSON_PATH, "r") as f_users:
+    new_users = []
+    for user in json.load(f_users):
+        new_users.append(
+            {
+                "name": user.get("name"),
+                "gender": user.get("gender"),
+                "address": user.get("address"),
+                "age": user.get("age"),
+                "books": []
+            }
+        )
 
-result = []
-book = obj.books_csv_reader()
+with open(BOOKS_CSV_PATH, "r") as f_books:
+    new_book = []
+    for book in list(DictReader(f_books)):
+        new_book.append({
+            "title": book.get("Title"),
+            "author": book.get("Author"),
+            "pages": book.get("Pages"),
+            "genre": book.get("Genre"),
+            })
 
-for each_user in obj.users_json_reader():
+while new_book:
+    for user in new_users:
+        if len(new_book) > 0:
+            user['books'].append(new_book.pop())
 
-    book_info = next(book)
-    result.append({
-        "name": each_user['name'],
-        "gender": each_user['gender'],
-        "address": each_user['address'],
-        "age": each_user['age'],
-        "books": {
-            "title": book_info[0],
-            "author": book_info[1],
-            "pages": book_info[3],
-            "genre": book_info[2]
-        }
-    })
-
-obj.output_json_writer(result)
+with open("result.json", "w") as result_file:
+    result_file.write(json.dumps(new_users, indent=4))
